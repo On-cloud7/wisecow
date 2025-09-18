@@ -1,25 +1,25 @@
-# Start with Ubuntu for easier package support
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
-# Avoid prompts during install
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install fortune-mod and cowsay
+# Install prerequisites
 RUN apt-get update && \
-    apt-get install -y fortune cowsay netcat && \
+    apt-get install -y fortune-mod cowsay netcat-openbsd && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Set PATH to include cowsay
+ENV PATH="/usr/games:${PATH}"
+
+# Create app directory
 WORKDIR /app
 
 # Copy the wisecow script
-COPY wisecow.sh /app/wisecow.sh
+COPY wisecow.sh .
 
-# Make it executable
-RUN chmod +x /app/wisecow.sh
+# Convert line endings and make script executable
+RUN sed -i 's/\r$//' wisecow.sh && chmod +x wisecow.sh
 
-# Expose default port
+# Expose port
 EXPOSE 4499
 
-# Run script on container start
-CMD ["/app/wisecow.sh"]
+# Run the application
+CMD ["./wisecow.sh"]
